@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>照片日期分類工具</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📷 照片日期分類工具</h1>
+        <p class="description">自動根據照片拍攝日期分類並整理到不同資料夾</p>
+
+        <div class="warning-box">
+            <strong>注意：</strong>此工具需要使用支援 File System Access API 的瀏覽器（Chrome 86+, Edge 86+）
+        </div>
+
+        <div class="control-panel">
+            <button id="selectFolderBtn" class="btn btn-primary">
+                <span class="icon">📁</span>
+                選擇照片資料夾
+            </button>
+
+            <div class="options">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="copyMode" checked>
+                    <span>複製模式（保留原檔案）</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="createSubfolder" checked>
+                    <span>在原資料夾內創建分類子資料夾</span>
+                </label>
+            </div>
+        </div>
+
+        <div id="progress" class="progress-section" style="display: none;">
+            <h3>處理進度</h3>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <p id="progressText" class="progress-text">0 / 0</p>
+        </div>
+
+        <div id="logSection" class="log-section" style="display: none;">
+            <h3>處理日誌</h3>
+            <div id="logContent" class="log-content"></div>
+        </div>
+
+        <div id="result" class="result-section" style="display: none;">
+            <h3>✅ 完成！</h3>
+            <div id="resultContent" class="result-content"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
