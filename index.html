@@ -22,14 +22,32 @@
             </button>
 
             <div class="options">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="copyMode" checked>
-                    <span>複製模式（保留原檔案）</span>
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="createSubfolder" checked>
-                    <span>在原資料夾內創建分類子資料夾</span>
-                </label>
+                <div class="option-group">
+                    <label class="option-title">資料夾分類方式：</label>
+                    <label class="radio-label">
+                        <input type="radio" name="dateFormat" value="year-month-day" checked>
+                        <span>年-月-日（例：2024-01-15）</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="dateFormat" value="year-month">
+                        <span>年-月（例：2024-01）</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="dateFormat" value="year">
+                        <span>年（例：2024）</span>
+                    </label>
+                </div>
+
+                <div class="option-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="copyMode" checked>
+                        <span>複製模式（保留原檔案）</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="createSubfolder" checked>
+                        <span>在原資料夾內創建分類子資料夾</span>
+                    </label>
+                </div>
             </div>
         </div>
 

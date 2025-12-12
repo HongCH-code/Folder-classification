@@ -169,7 +169,20 @@ function formatDateForFolder(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+
+    // 獲取用戶選擇的日期格式
+    const dateFormatRadio = document.querySelector('input[name="dateFormat"]:checked');
+    const dateFormat = dateFormatRadio ? dateFormatRadio.value : 'year-month-day';
+
+    switch(dateFormat) {
+        case 'year-month':
+            return `${year}-${month}`;
+        case 'year':
+            return `${year}`;
+        case 'year-month-day':
+        default:
+            return `${year}-${month}-${day}`;
+    }
 }
 
 // 分類並整理照片
