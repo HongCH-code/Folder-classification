@@ -175,6 +175,37 @@ h1 {
     accent-color: #2a2a2a;
 }
 
+/* 嵌套選項樣式 */
+.nested-options {
+    margin-left: 25px;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background: white;
+    border-left: 2px solid #d0d0d0;
+}
+
+.nested-options-2 {
+    margin-left: 25px;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background: #f5f5f5;
+    border-left: 2px solid #c0c0c0;
+}
+
+.option-subtitle {
+    font-size: 0.85em;
+    font-weight: 500;
+    color: #5a5a5a;
+    margin-bottom: 8px;
+    display: block;
+    letter-spacing: 0.5px;
+}
+
+.nested-radio {
+    padding-left: 0;
+    margin-bottom: 5px;
+}
+
 .progress-section,
 .log-section,
 .result-section {

@@ -28,14 +28,43 @@
                         <input type="radio" name="dateFormat" value="year-month-day" checked>
                         <span>年-月-日（例：2024-01-15）</span>
                     </label>
+
                     <label class="radio-label">
                         <input type="radio" name="dateFormat" value="year-month">
                         <span>年-月（例：2024-01）</span>
                     </label>
+                    <div id="yearMonthNested" class="nested-options" style="display: none;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="yearMonthToDay">
+                            <span>在年-月資料夾內再細分為年-月-日</span>
+                        </label>
+                    </div>
+
                     <label class="radio-label">
                         <input type="radio" name="dateFormat" value="year">
                         <span>年（例：2024）</span>
                     </label>
+                    <div id="yearNested" class="nested-options" style="display: none;">
+                        <label class="option-subtitle">進階分類：</label>
+                        <label class="radio-label nested-radio">
+                            <input type="radio" name="yearSubFormat" value="none" checked>
+                            <span>不再細分</span>
+                        </label>
+                        <label class="radio-label nested-radio">
+                            <input type="radio" name="yearSubFormat" value="year-month">
+                            <span>在年資料夾內再細分為年-月</span>
+                        </label>
+                        <div id="yearMonthNested2" class="nested-options-2" style="display: none;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="yearMonthToDay2">
+                                <span>在年-月資料夾內再細分為年-月-日</span>
+                            </label>
+                        </div>
+                        <label class="radio-label nested-radio">
+                            <input type="radio" name="yearSubFormat" value="year-month-day">
+                            <span>在年資料夾內再細分為年-月-日</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="option-group">
@@ -45,7 +74,7 @@
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="createSubfolder" checked>
-                        <span>在原資料夾內創建分類子資料夾</span>
+                        <span>在原資料夾內創建分類子資料夾（不勾選則選擇其他目標資料夾）</span>
                     </label>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 // 全局變數
 let sourceFolderHandle = null;
+let targetFolderHandle = null;
 let photoFiles = [];
 let processedCount = 0;
 let totalCount = 0;
@@ -21,6 +22,44 @@ const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.h
 
 // 事件監聽器
 selectFolderBtn.addEventListener('click', selectAndProcessFolder);
+
+// 日期格式選項變更監聽
+document.querySelectorAll('input[name="dateFormat"]').forEach(radio => {
+    radio.addEventListener('change', handleDateFormatChange);
+});
+
+// 年的子格式選項變更監聽
+document.querySelectorAll('input[name="yearSubFormat"]').forEach(radio => {
+    radio.addEventListener('change', handleYearSubFormatChange);
+});
+
+// 處理日期格式變更
+function handleDateFormatChange(e) {
+    const yearMonthNested = document.getElementById('yearMonthNested');
+    const yearNested = document.getElementById('yearNested');
+
+    // 隱藏所有嵌套選項
+    yearMonthNested.style.display = 'none';
+    yearNested.style.display = 'none';
+
+    // 根據選擇顯示對應的嵌套選項
+    if (e.target.value === 'year-month') {
+        yearMonthNested.style.display = 'block';
+    } else if (e.target.value === 'year') {
+        yearNested.style.display = 'block';
+    }
+}
+
+// 處理年的子格式變更
+function handleYearSubFormatChange(e) {
+    const yearMonthNested2 = document.getElementById('yearMonthNested2');
+
+    if (e.target.value === 'year-month') {
+        yearMonthNested2.style.display = 'block';
+    } else {
+        yearMonthNested2.style.display = 'none';
+    }
+}
 
 // 檢查瀏覽器支援
 function checkBrowserSupport() {
@@ -79,6 +118,19 @@ async function selectAndProcessFolder() {
 
         addLog(`找到 ${photoFiles.length} 個照片文件`, 'success');
 
+        // 檢查是否需要選擇目標資料夾
+        const createSubfolder = createSubfolderCheckbox.checked;
+        if (!createSubfolder) {
+            addLog('請選擇目標資料夾（用於存放整理後的照片）...', 'info');
+            targetFolderHandle = await window.showDirectoryPicker({
+                mode: 'readwrite'
+            });
+            addLog(`已選擇目標資料夾: ${targetFolderHandle.name}`, 'success');
+        } else {
+            // 如果勾選在原資料夾內創建，目標資料夾就是原資料夾
+            targetFolderHandle = sourceFolderHandle;
+        }
+
         // 處理照片分類
         await classifyAndOrganizePhotos();
 
@@ -98,6 +150,7 @@ function resetUI() {
     photoFiles = [];
     processedCount = 0;
     totalCount = 0;
+    targetFolderHandle = null;
     logContent.innerHTML = '';
     resultSection.style.display = 'none';
     progressSection.style.display = 'none';
@@ -165,6 +218,7 @@ function extractExifDate(file) {
 }
 
 // 格式化日期為資料夾名稱
+// 格式化日期為資料夾路徑（支持層級結構）
 function formatDateForFolder(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -174,15 +228,62 @@ function formatDateForFolder(date) {
     const dateFormatRadio = document.querySelector('input[name="dateFormat"]:checked');
     const dateFormat = dateFormatRadio ? dateFormatRadio.value : 'year-month-day';
 
+    const path = [];
+
     switch(dateFormat) {
-        case 'year-month':
-            return `${year}-${month}`;
-        case 'year':
-            return `${year}`;
         case 'year-month-day':
+            // 單層：年-月-日
+            path.push(`${year}-${month}-${day}`);
+            break;
+
+        case 'year-month':
+            // 檢查是否需要再細分為年-月-日
+            const yearMonthToDay = document.getElementById('yearMonthToDay').checked;
+
+            if (yearMonthToDay) {
+                // 兩層：年-月 / 年-月-日
+                path.push(`${year}-${month}`);
+                path.push(`${year}-${month}-${day}`);
+            } else {
+                // 單層：年-月
+                path.push(`${year}-${month}`);
+            }
+            break;
+
+        case 'year':
+            // 檢查子格式選擇
+            const yearSubFormatRadio = document.querySelector('input[name="yearSubFormat"]:checked');
+            const yearSubFormat = yearSubFormatRadio ? yearSubFormatRadio.value : 'none';
+
+            if (yearSubFormat === 'year-month') {
+                // 檢查是否需要再細分為年-月-日
+                const yearMonthToDay2 = document.getElementById('yearMonthToDay2').checked;
+
+                if (yearMonthToDay2) {
+                    // 三層：年 / 年-月 / 年-月-日
+                    path.push(`${year}`);
+                    path.push(`${year}-${month}`);
+                    path.push(`${year}-${month}-${day}`);
+                } else {
+                    // 兩層：年 / 年-月
+                    path.push(`${year}`);
+                    path.push(`${year}-${month}`);
+                }
+            } else if (yearSubFormat === 'year-month-day') {
+                // 兩層：年 / 年-月-日
+                path.push(`${year}`);
+                path.push(`${year}-${month}-${day}`);
+            } else {
+                // 單層：年
+                path.push(`${year}`);
+            }
+            break;
+
         default:
-            return `${year}-${month}-${day}`;
+            path.push(`${year}-${month}-${day}`);
     }
+
+    return path;
 }
 
 // 分類並整理照片
@@ -190,9 +291,8 @@ async function classifyAndOrganizePhotos() {
     addLog('開始分類照片...', 'info');
 
     const copyMode = copyModeCheckbox.checked;
-    const createSubfolder = createSubfolderCheckbox.checked;
 
-    // 按日期分組
+    // 按日期分組（使用路徑陣列作為 key）
     const photosByDate = new Map();
     totalCount = photoFiles.length;
     processedCount = 0;
@@ -201,38 +301,42 @@ async function classifyAndOrganizePhotos() {
     addLog('正在讀取照片日期資訊...', 'info');
     for (const fileHandle of photoFiles) {
         const date = await getPhotoDate(fileHandle);
-        const dateKey = formatDateForFolder(date);
+        const datePath = formatDateForFolder(date);
+        const dateKey = datePath.join('/'); // 使用路徑字符串作為 Map key
 
         if (!photosByDate.has(dateKey)) {
-            photosByDate.set(dateKey, []);
+            photosByDate.set(dateKey, { path: datePath, files: [] });
         }
-        photosByDate.get(dateKey).push(fileHandle);
+        photosByDate.get(dateKey).files.push(fileHandle);
 
         processedCount++;
         updateProgress(processedCount, totalCount * 2); // 總共兩個階段
     }
 
-    addLog(`已分類為 ${photosByDate.size} 個日期`, 'success');
+    addLog(`已分類為 ${photosByDate.size} 個分類`, 'success');
 
     // 第二步：創建資料夾並複製/移動文件
     const actionText = copyMode ? '複製' : '移動';
     addLog(`正在${actionText}照片到資料夾...`, 'info');
 
-    const targetFolderHandle = createSubfolder ? sourceFolderHandle : sourceFolderHandle;
+    // 使用全局的 targetFolderHandle（已在 selectAndProcessFolder 中設置）
     let successCount = 0;
     let errorCount = 0;
 
-    for (const [dateKey, files] of photosByDate) {
+    for (const [dateKey, { path, files }] of photosByDate) {
         try {
-            // 創建日期資料夾
-            const dateFolderHandle = await targetFolderHandle.getDirectoryHandle(dateKey, { create: true });
+            // 遞歸創建多層資料夾
+            let currentFolder = targetFolderHandle;
+            for (const folderName of path) {
+                currentFolder = await currentFolder.getDirectoryHandle(folderName, { create: true });
+            }
             addLog(`創建資料夾: ${dateKey}`, 'info');
 
-            // 複製/移動文件到日期資料夾
+            // 複製/移動文件到最終資料夾
             for (const fileHandle of files) {
                 try {
                     const file = await fileHandle.getFile();
-                    const newFileHandle = await dateFolderHandle.getFileHandle(file.name, { create: true });
+                    const newFileHandle = await currentFolder.getFileHandle(file.name, { create: true });
                     const writable = await newFileHandle.createWritable();
                     await writable.write(file);
                     await writable.close();
